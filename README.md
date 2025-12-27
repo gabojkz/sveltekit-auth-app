@@ -2,9 +2,25 @@
 
 A production-ready authentication starter with **SvelteKit**, **Better Auth**, **PostgreSQL**, **Podman**, **Supabase**, and **Cloudflare Pages** deployment.
 
+## 🎯 Use as Template
+
+Create a new app from this starter:
+
+```bash
+# Option 1: Use the create script
+cd sveltekit-auth-app
+./create-app.sh my-new-app
+
+# Option 2: Manual copy
+cp -r sveltekit-auth-app my-new-app
+cd my-new-app
+rm -rf .git node_modules .svelte-kit
+npm install
+```
+
 ## 🚀 Features
 
-- **🔐 Better Auth** - Modern, type-safe authentication
+- **🔐 Better Auth** - Modern authentication with JSDoc types
 - **🐘 PostgreSQL** - Battle-tested relational database
 - **🐳 Podman** - Container-based local development
 - **☁️ Supabase** - Managed PostgreSQL for production
@@ -35,7 +51,7 @@ npm run podman:up
 ```
 
 This starts:
-- PostgreSQL on `localhost:5432`
+- PostgreSQL on `localhost:5433`
 - Adminer (DB admin UI) on `localhost:8080`
 
 ### 3. Configure Environment
@@ -44,7 +60,7 @@ Create a `.env` file:
 
 ```env
 # Local development (Podman PostgreSQL)
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/auth_db"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/auth_db"
 BETTER_AUTH_SECRET="your-super-secret-key-generate-with-openssl-rand-base64-32"
 ```
 
@@ -108,22 +124,23 @@ Or connect your GitHub repo to Cloudflare Pages for automatic deployments.
 ├── src/
 │   ├── lib/
 │   │   ├── server/
-│   │   │   ├── auth.ts      # Better Auth configuration
-│   │   │   ├── db.ts        # Database connection
-│   │   │   └── schema.ts    # Drizzle schema
-│   │   └── auth-client.ts   # Client-side auth
+│   │   │   ├── auth.js       # Better Auth configuration
+│   │   │   ├── db.js         # Database connection
+│   │   │   └── schema.js     # Drizzle schema
+│   │   └── auth-client.js    # Client-side auth
 │   ├── routes/
 │   │   ├── api/auth/[...all]/  # Auth API endpoints
-│   │   ├── login/           # Login page
-│   │   ├── register/        # Registration page
-│   │   ├── dashboard/       # Protected dashboard
-│   │   └── +page.svelte     # Landing page
-│   ├── hooks.server.ts      # Session handling
-│   └── app.d.ts             # Type definitions
-├── podman-compose.yaml      # Local database setup
-├── wrangler.toml            # Cloudflare configuration
-├── drizzle.config.ts        # Drizzle ORM config
-└── init.sql                 # Database initialization
+│   │   ├── login/            # Login page
+│   │   ├── register/         # Registration page
+│   │   ├── dashboard/        # Protected dashboard
+│   │   └── +page.svelte      # Landing page
+│   ├── hooks.server.js       # Session handling
+│   └── app.d.ts              # Type definitions
+├── podman-compose.yaml       # Local database setup
+├── wrangler.toml             # Cloudflare configuration
+├── drizzle.config.js         # Drizzle ORM config
+├── create-app.sh             # Template scaffolding script
+└── init.sql                  # Database initialization
 ```
 
 ## 🛠️ Available Scripts
@@ -133,7 +150,7 @@ Or connect your GitHub repo to Cloudflare Pages for automatic deployments.
 | `npm run dev` | Start development server |
 | `npm run build` | Build for production |
 | `npm run preview` | Preview production build |
-| `npm run podman:up` | Start local PostgreSQL (uses `podman compose`) |
+| `npm run podman:up` | Start local PostgreSQL |
 | `npm run podman:down` | Stop local PostgreSQL |
 | `npm run podman:logs` | View container logs |
 | `npm run db:generate` | Generate migrations |
@@ -146,28 +163,28 @@ Or connect your GitHub repo to Cloudflare Pages for automatic deployments.
 - Email/Password registration and login
 - Secure session management
 - Protected routes with server-side checks
-- Type-safe session handling
+- JSDoc type annotations
 
 ## 🎨 Customization
 
 ### Adding OAuth Providers
 
-Update `src/lib/server/auth.ts`:
+Update `src/lib/server/auth.js`:
 
-```typescript
+```javascript
 import { betterAuth } from 'better-auth';
 
-export function createAuth(databaseUrl: string, baseUrl: string) {
+export function createAuth(databaseUrl, baseUrl) {
   return betterAuth({
     // ... existing config
     socialProviders: {
       google: {
-        clientId: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       },
       github: {
-        clientId: process.env.GITHUB_CLIENT_ID!,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+        clientId: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
       },
     },
   });
@@ -178,10 +195,13 @@ export function createAuth(databaseUrl: string, baseUrl: string) {
 
 Enable in auth config:
 
-```typescript
+```javascript
 emailAndPassword: {
   enabled: true,
   requireEmailVerification: true,
+  sendVerificationEmail: async ({ user, url }) => {
+    // Send email via Resend, SendGrid, etc.
+  }
 }
 ```
 
