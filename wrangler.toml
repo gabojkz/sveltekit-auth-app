@@ -1,0 +1,15 @@
+name = "sveltekit-auth-app"
+compatibility_date = "2024-12-26"
+compatibility_flags = ["nodejs_compat"]
+
+# Required for Supabase/Neon connections
+# These are set via Cloudflare dashboard or wrangler secret
+# DATABASE_URL = "your-supabase-or-neon-connection-string"
+# BETTER_AUTH_SECRET = "your-secret-key"
+
+[vars]
+NODE_ENV = "production"
+
+# Pages configuration
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
